@@ -102,81 +102,21 @@
     <h3 style="margin:0 0 8px">Settings</h3>
     <p class="muted" style="margin:0 0 12px">Paste an OpenAI key (stored only in your browser). Optionally enable image search via Bing or Giphy keys (server-side recommended).</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div><div class="sub">OpenAI Key</div><input id="apiKey" placeholder="sk-..." style="width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f0f12;color:#0f0f12;color:var(--ink)"></div>
-      <div><div class="sub">Model</div><input id="model" value="gpt-4o-mini" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f0f12;color:var(--ink)"></div>
+      <div>
+        <div class="sub">OpenAI Key</div>
+        <input id="apiKey" placeholder="sk-..." style="width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f0f12;color:var(--ink)">
+      </div>
+      <div>
+        <div class="sub">Model</div>
+        <input id="model" value="gpt-4o-mini" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f0f12;color:var(--ink)">
+      </div>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px"><button id="saveSettings" class="primary">Save</button><button id="closeSettings" class="outline">Close</button></div>
   </dialog>
 
   <script>
-    const seed = {"name": "Lars Jorgensen", "title": "Creative Director / ECD", "location": "Lisbon, Portugal", "emails": ["larsandnikki@twoandahalfvikings.com"], "sources": [{"name": "Portfolio", "url": "https://larsmarsjorgensen.com"}, {"name": "KISS Studio", "url": "https://keeptitstupidsimple.studio"}, {"name": "Behance", "url": "https://www.behance.net/larsmarsjorgensen"}, {"name": "LinkedIn", "url": "https://www.linkedin.com/in/larsmarsjorgensen"}], "voice": "Vonnegut×Adams: irreverent, humane, dry wit; concise single-paragraph answers."};
+    const seed = {"name":"Lars Jorgensen","title":"Creative Director / ECD","location":"Lisbon, Portugal","emails":["larsandnikki@twoandahalfvikings.com"],"sources":[{"name":"Portfolio","url":"https://larsmarsjorgensen.com"},{"name":"KISS Studio","url":"https://keeptitstupidsimple.studio"},{"name":"Behance","url":"https://www.behance.net/larsmarsjorgensen"},{"name":"LinkedIn","url":"https://www.linkedin.com/in/larsmarsjorgensen"}],"voice":"Vonnegut×Adams: irreverent, humane, dry wit; concise single-paragraph answers."};
+
     const sugg = [
       "Give me a one-paragraph overview in your voice.",
-      "Two must-see pieces for a toy brand CMO — briefly, with sources.",
-      "Break LEGO Holiday in one paragraph, credits first.",
-      "Hospitality: the UNU story in one paragraph, and a source.",
-      "Collaborators and agencies to know — one paragraph, credits up front.",
-      "Show me something random — and label [absurd] if it is.",
-    ];
-    const byId = id => document.getElementById(id);
-    const chat = byId('chat'); const banner=byId('banner');
-
-    function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text) e.textContent=text; return e; }
-    function linkify(t){ return (t||'').replace(/(https?:\/\/[^\s)]+)|(www\.[^\s)]+)/g, u => `<a href="${u.startsWith('http')?u:'https://'+u}" target="_blank">${u}</a>`); }
-    function pushMessage(role, content, images=[], sources=[]) {
-      const row = el('div', 'msg');
-      const dot = el('div', 'dot ' + (role==='assistant'?'assistant':'user'), role==='assistant'?'✶':'🙂'); row.appendChild(dot);
-      const body = el('div', '');
-      body.innerHTML = linkify(content);
-      if (images && images.length) {
-        const gallery = el('div','media'); images.slice(0,4).forEach(src => { const img=new Image(); img.src=src; gallery.appendChild(img); });
-        body.appendChild(gallery);
-      }
-      if (sources && sources.length) {
-        const s = el('div','sources'); s.innerHTML = 'Sources: ' + sources.map(x => `<a href="${x.url}" target="_blank">${x.name||x.url}</a>`).join(' · '); body.appendChild(s);
-      }
-      row.appendChild(body); chat.appendChild(row); chat.scrollTop=chat.scrollHeight;
-    }
-    function setBanner(msg){ banner.style.display = msg? 'block':'none'; banner.textContent = msg||''; }
-
-    // Render sources + chips
-    const sourcesDiv = byId('sources'); seed.sources.forEach(s => { const a = document.createElement('a'); a.href=s.url; a.textContent='• '+s.name; a.target='_blank'; a.style.display='block'; a.style.color='#9a9aa0'; sourcesDiv.appendChild(a); });
-    const chips = byId('chips'); const suggWrap = byId('sugg');
-    function renderChips(target){ target.innerHTML=''; sugg.forEach(p => { const b=el('button','chip',p); b.onclick=()=>send(p); target.appendChild(b); }); }
-    renderChips(chips); renderChips(suggWrap);
-
-    // Modes/engines
-    let mode = localStorage.getItem('mode')||'playful';
-    let engine = localStorage.getItem('engine')||'fn';
-    let apiKey = localStorage.getItem('openai_key')||'';
-    let model = localStorage.getItem('openai_model')||'gpt-4o-mini';
-
-    function highlight(id, group){ group.forEach(x => byId(x).style.outline='1px solid var(--line)'); byId(id).style.outline='2px solid #2a2a2f'; }
-    highlight('mode-'+mode, ['mode-factual','mode-playful','mode-absurd']); highlight('engine-'+engine.replace('fn','fn'), ['engine-fn','engine-openai','engine-local']);
-    byId('mode-factual').onclick=()=>{mode='factual';localStorage.setItem('mode',mode);highlight('mode-factual',['mode-factual','mode-playful','mode-absurd']);}
-    byId('mode-playful').onclick=()=>{mode='playful';localStorage.setItem('mode',mode);highlight('mode-playful',['mode-factual','mode-playful','mode-absurd']);}
-    byId('mode-absurd').onclick=()=>{mode='absurd';localStorage.setItem('mode',mode);highlight('mode-absurd',['mode-factual','mode-playful','mode-absurd']);}
-    byId('engine-fn').onclick=()=>{engine='fn';localStorage.setItem('engine',engine);highlight('engine-fn',['engine-fn','engine-openai','engine-local']); setBanner('Using Netlify Function (/.netlify/functions/ask & /ingest).');}
-    byId('engine-openai').onclick=()=>{engine='openai';localStorage.setItem('engine',engine);highlight('engine-openai',['engine-fn','engine-openai','engine-local']); setBanner('Calling OpenAI directly (requires key in Settings).');}
-    byId('engine-local').onclick=()=>{engine='local';localStorage.setItem('engine',engine);highlight('engine-local',['engine-fn','engine-openai','engine-local']); setBanner('Local demo answers.');}
-
-    // Settings
-    const dlg = byId('settingsModal'); byId('settings').onclick=()=>dlg.showModal(); byId('closeSettings').onclick=()=>dlg.close();
-    byId('apiKey').value = apiKey; byId('model').value=model;
-    byId('saveSettings').onclick=()=>{ apiKey=byId('apiKey').value.trim(); model=byId('model').value.trim()||'gpt-4o-mini'; localStorage.setItem('openai_key',apiKey); localStorage.setItem('openai_model',model); setBanner(apiKey?'Key saved':'Key cleared'); dlg.close(); };
-
-    // Input
-    byId('reset').onclick=()=>{ chat.innerHTML=''; welcome(); };
-    byId('send').onclick=()=>{ const inp=byId('input'); const q=(inp.value||'').trim(); if(!q) return; inp.value=''; pushMessage('user', q); route(q); };
-    byId('input').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();byId('send').click();} });
-
-    function welcome(){ pushMessage('assistant', "Welcome. Ask for an overview, show me work that fits X, or throw me something absurd. I’ll answer in one paragraph, give credit up front, and quietly list sources in grey when it matters."); }
-    welcome();
-
-    function buildMessages(q){
-      const modeLine = mode==='absurd'
-        ? "ABSURD ON: You may add a clearly tagged [absurd] clause or two; keep core answer useful and truthful."
-        : mode==='factual'
-          ? "FACTUAL MODE: Ground everything in seed/ingested sources; if unknown, label [unverified]."
-          : "PLAYFUL MODE: Dry wit allowed; keep it useful and concise; label uncertainties.";
-      const system = `You are a portfolio concierge. Voice = Vonnegut×Adams: irreverent, humane, concise. Always respond as ONE paragraph (no line breaks), max ~110 words. Credit collaborators first when relevant. Include a short 'Sources:' list only if you relied on seed/ingested links, rendered as names/URLs in plain text. If user asks for random/irreverent, you may add a s
+      "Two
