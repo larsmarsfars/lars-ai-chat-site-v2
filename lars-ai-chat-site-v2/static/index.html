@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lars • Chat Portfolio</title>
+  <meta name="description" content="A written, irreverent, one-paragraph GPT-led portfolio.">
+  <style>
+    :root{
+      --bg:#0c0c0d; --card:#141416; --ink:#e9e9ec; --muted:#9a9aa0; --accent:#7dd4fc; --line:#232327; --chip:#1b1b1f;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    a{color:inherit}
+    header{position:sticky;top:0;background:#0c0c0dc0;backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+    .wrap{max-width:980px;margin:0 auto;padding:14px 18px}
+    .row{display:grid;gap:16px;grid-template-columns:1fr}
+    @media(min-width:900px){.row{grid-template-columns:1.6fr .9fr}}
+    .brand{display:flex;align-items:center;gap:10px}
+    .badge{height:34px;width:34px;border-radius:10px;background:#e9e9ec;color:#0c0c0d;display:grid;place-items:center;font-weight:800}
+    .title{font-weight:700}
+    .sub{font-size:12px;color:var(--muted)}
+    .nav a{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:8px;text-decoration:none;margin-left:6px;background:transparent}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+    h1{font-size:18px;margin:0 0 8px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+    .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--chip);cursor:pointer;color:var(--ink)}
+    textarea{width:100%;min-height:80px;background:#0f0f12;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
+    button.primary{background:var(--ink);color:#0c0c0d;border:none;padding:10px 14px;border-radius:10px;font-weight:700}
+    button.outline{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 12px;border-radius:10px}
+    .chat{height:52vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:6px}
+    .msg{display:flex;gap:8px}
+    .dot{height:26px;width:26px;border-radius:8px;display:grid;place-items:center;color:#0c0c0d;font-weight:800}
+    .assistant{background:var(--accent)}
+    .user{background:#7ee787}
+    .muted{color:var(--muted)}
+    .sources{margin-top:6px;font-size:12px;color:#7a7a83}
+    .media{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+    .media img{width:100%;height:160px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#08080a}
+    .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+    .pill{border:1px solid var(--line);padding:4px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
+    .banner{display:none;background:#17171a;border:1px solid var(--line);padding:8px 10px;border-radius:10px;color:#bdbdc5;font-size:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div class="brand"><div class="badge">LJ</div><div><div class="title">Lars Jorgensen</div><div class="sub">Creative Director / ECD · Lisbon, Portugal</div></div></div>
+      <nav class="nav"><a href="https://larsmarsjorgensen.com" target="_blank">Website</a><a href="mailto:larsandnikki@twoandahalfvikings.com">Contact</a></nav>
+    </div>
+  </header>
+  <main class="wrap" style="padding:20px 18px 48px">
+    <section class="row">
+      <div>
+        <h1>Chat, but make it writing-first.</h1>
+        <p class="muted">Short irreverent answers, one paragraph at a time. Ask directly or tap a chip.</p>
+
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px">
+            <div>
+              <div class="sub">Engine</div>
+              <div class="chips"><button class="chip" id="engine-fn">Netlify Function</button><button class="chip" id="engine-openai">OpenAI (paste key)</button><button class="chip" id="engine-local">Local</button></div>
+            </div>
+            <div>
+              <div class="sub">Reality</div>
+              <div class="chips"><span class="chip" id="mode-factual">Factual</span><span class="chip" id="mode-playful">Playful</span><span class="chip" id="mode-absurd">Absurd*</span></div>
+            </div>
+          </div>
+
+          <div id="banner" class="banner"></div>
+          <div id="chips" class="chips"></div>
+          <div id="chat" class="chat"></div>
+
+          <div class="bar">
+            <textarea id="input" placeholder="Try: a one-paragraph overview; two must‑see pieces for a toy brand CMO; collaborators worth knowing; ‘show me something random’."></textarea>
+          </div>
+          <div class="bar">
+            <div style="display:flex;gap:8px"><button id="send" class="primary">Send →</button><button id="reset" class="outline">Reset</button><button id="settings" class="outline">Settings</button></div>
+            <div class="pill">* Absurd mode clearly labels invented bits.</div>
+          </div>
+        </div>
+      </div>
+
+      <aside style="display:flex;flex-direction:column;gap:12px">
+        <div class="card">
+          <div class="sub">About</div>
+          <div><strong>Lars Jorgensen</strong> — Creative Director / ECD based in Lisbon, Portugal. Written site, not a circus; ideas first, craft second, confetti never.</div>
+        </div>
+        <div class="card">
+          <div class="sub">Sources</div>
+          <div id="sources"></div>
+        </div>
+        <div class="card">
+          <div class="sub">Ideas to try</div>
+          <div id="sugg" class="chips"></div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <dialog id="settingsModal" style="border:none;border-radius:12px;padding:16px;width:520px;max-width:90%">
+    <h3 style="margin:0 0 8px">Settings</h3>
+    <p class="muted" style="margin:0 0 12px">Paste an OpenAI key (stored only in your browser). Optionally enable image search via Bing or Giphy keys (server-side recommended).</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><div class="sub">OpenAI Key</div><input id="apiKey" placeholder="sk-..." style="width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f0f12;color:var(--ink)"></div>
+      <div><div class="sub">Model</div><input id="model" value="gpt-4o-mini" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f0f12;color:var(--ink)"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px"><button id="saveSettings" class="primary">Save</button><button id="closeSettings" class="outline">Close</button></div>
+  </dialog>
+
+  <script>
+    const seed = {"name": "Lars Jorgensen", "title": "Creative Director / ECD", "location": "Lisbon, Portugal", "emails": ["larsandnikki@twoandahalfvikings.com"], "sources": [{"name": "Portfolio", "url": "https://larsmarsjorgensen.com"}, {"name": "KISS Studio", "url": "https://keeptitstupidsimple.studio"}, {"name": "Behance", "url": "https://www.behance.net/larsmarsjorgensen"}, {"name": "LinkedIn", "url": "https://www.linkedin.com/in/larsmarsjorgensen"}], "voice": "Vonnegut\u00d7Adams: irreverent, humane, dry wit; concise single-paragraph answers."};
+    const sugg = [
+      "Give me a one-paragraph overview in your voice.",
+      "Two must-see pieces for a toy brand CMO — briefly, with sources.",
+      "Break LEGO Holiday in one paragraph, credits first.",
+      "Hospitality: the UNU story in one paragraph, and a source.",
+      "Collaborators and agencies to know — one paragraph, credits up front.",
+      "Show me something random — and label [absurd] if it is.",
+    ];
+    const byId = id => document.getElementById(id);
+    const chat = byId('chat'); const banner=byId('banner');
+
+    function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text) e.textContent=text; return e; }
+    function linkify(t){ return (t||'').replace(/(https?:\/\/[^\s)]+)|(www\.[^\s)]+)/g, u => `<a href="${u.startsWith('http')?u:'https://'+u}" target="_blank">${u}</a>`); }
+    function pushMessage(role, content, images=[], sources=[]) {
+      const row = el('div', 'msg');
+      const dot = el('div', 'dot ' + (role==='assistant'?'assistant':'user'), role==='assistant'?'✶':'🙂'); row.appendChild(dot);
+      const body = el('div', '');
+      body.innerHTML = linkify(content);
+      if (images && images.length) {
+        const gallery = el('div','media'); images.slice(0,4).forEach(src => { const img=new Image(); img.src=src; gallery.appendChild(img); });
+        body.appendChild(gallery);
+      }
+      if (sources && sources.length) {
+        const s = el('div','sources'); s.innerHTML = 'Sources: ' + sources.map(x => `<a href="${x.url}" target="_blank">${x.name||x.url}</a>`).join(' · '); body.appendChild(s);
+      }
+      row.appendChild(body); chat.appendChild(row); chat.scrollTop=chat.scrollHeight;
+    }
+    function setBanner(msg){ banner.style.display = msg? 'block':'none'; banner.textContent = msg||''; }
+
+    // Render sources + chips
+    const sourcesDiv = byId('sources'); seed.sources.forEach(s => { const a = document.createElement('a'); a.href=s.url; a.textContent='• '+s.name; a.target='_blank'; a.style.display='block'; a.style.color='#9a9aa0'; sourcesDiv.appendChild(a); });
+    const chips = byId('chips'); const suggWrap = byId('sugg');
+    function renderChips(target){ target.innerHTML=''; sugg.forEach(p => { const b=el('button','chip',p); b.onclick=()=>send(p); target.appendChild(b); }); }
+    renderChips(chips); renderChips(suggWrap);
+
+    // Modes/engines
+    let mode = localStorage.getItem('mode')||'playful';
+    let engine = localStorage.getItem('engine')||'fn';
+    let apiKey = localStorage.getItem('openai_key')||'';
+    let model = localStorage.getItem('openai_model')||'gpt-4o-mini';
+
+    function highlight(id, group){ group.forEach(x => byId(x).style.outline='1px solid var(--line)'); byId(id).style.outline='2px solid #2a2a2f'; }
+    highlight('mode-'+mode, ['mode-factual','mode-playful','mode-absurd']); highlight('engine-'+engine.replace('fn','fn'), ['engine-fn','engine-openai','engine-local']);
+    byId('mode-factual').onclick=()=>{mode='factual';localStorage.setItem('mode',mode);highlight('mode-factual',['mode-factual','mode-playful','mode-absurd']);}
+    byId('mode-playful').onclick=()=>{mode='playful';localStorage.setItem('mode',mode);highlight('mode-playful',['mode-factual','mode-playful','mode-absurd']);}
+    byId('mode-absurd').onclick=()=>{mode='absurd';localStorage.setItem('mode',mode);highlight('mode-absurd',['mode-factual','mode-playful','mode-absurd']);}
+    byId('engine-fn').onclick=()=>{engine='fn';localStorage.setItem('engine',engine);highlight('engine-fn',['engine-fn','engine-openai','engine-local']); setBanner('Using Netlify Function (/.netlify/functions/ask & /ingest).');}
+    byId('engine-openai').onclick=()=>{engine='openai';localStorage.setItem('engine',engine);highlight('engine-openai',['engine-fn','engine-openai','engine-local']); setBanner('Calling OpenAI directly (requires key in Settings).');}
+    byId('engine-local').onclick=()=>{engine='local';localStorage.setItem('engine',engine);highlight('engine-local',['engine-fn','engine-openai','engine-local']); setBanner('Local demo answers.');}
+
+    // Settings
+    const dlg = byId('settingsModal'); byId('settings').onclick=()=>dlg.showModal(); byId('closeSettings').onclick=()=>dlg.close();
+    byId('apiKey').value = apiKey; byId('model').value=model;
+    byId('saveSettings').onclick=()=>{ apiKey=byId('apiKey').value.trim(); model=byId('model').value.trim()||'gpt-4o-mini'; localStorage.setItem('openai_key',apiKey); localStorage.setItem('openai_model',model); setBanner(apiKey?'Key saved':'Key cleared'); dlg.close(); };
+
+    // Input
+    byId('reset').onclick=()=>{ chat.innerHTML=''; welcome(); };
+    byId('send').onclick=()=>{ const inp=byId('input'); const q=(inp.value||'').trim(); if(!q) return; inp.value=''; pushMessage('user', q); route(q); };
+    byId('input').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();byId('send').click();} });
+
+    function welcome(){ pushMessage('assistant', "Welcome. Ask for an overview, show me work that fits X, or throw me something absurd. I’ll answer in one paragraph, give credit up front, and quietly list sources in grey when it matters."); }
+    welcome();
+
+    function buildMessages(q){
+      const modeLine = mode==='absurd'
+        ? "ABSURD ON: You may add a clearly tagged [absurd] clause or two; keep core answer useful and truthful."
+        : mode==='factual'
+          ? "FACTUAL MODE: Ground everything in seed/ingested sources; if unknown, label [unverified]."
+          : "PLAYFUL MODE: Dry wit allowed; keep it useful and concise; label uncertainties.";
+      const system = `You are a portfolio concierge. Voice = Vonnegut×Adams: irreverent, humane, concise. Always respond as ONE paragraph (no line breaks), max ~110 words. Credit collaborators first when relevant. Include a short 'Sources:' list only if you relied on seed/ingested links, rendered as names/URLs in plain text. If user asks for random/irreverent, you may add a short [absurd] aside that’s obviously fictional. Avoid lists, avoid headings; one tight paragraph.`;
+      return [
+        {role:'system', content: system + "\n" + modeLine},
+        {role:'user', content: "SEED (truth anchors):\n"+JSON.stringify(seed)},
+        {role:'user', content: "QUESTION: "+q}
+      ];
+    }
+
+    async function route(q){
+      if(engine==='local') return localAnswer(q);
+      if(engine==='openai') return openaiAnswer(q);
+      return functionAnswer(q);
+    }
+
+    function localAnswer(q){
+      const t=q.toLowerCase();
+      let msg="I’m the demo brain: ask for an overview, LEGO Holiday in one paragraph, UNU in one paragraph, or collaborators credit-first; I’ll also throw in a source if it helps.";
+      if(/overview|general|about/.test(t)) msg="Lars is a Lisbon-based creative director who marries narrative clarity with playful mischief, builds modular teams via KISS, and is best known for LEGO Holiday storytelling and a surf-leaning Sri Lankan hospitality project; if you want the short list, ask me for two must‑see pieces and I’ll point you briskly with sources.";
+      if(/lego|holiday|worlds|brand film/.test(t)) msg="The LEGO Holiday work is a music-led nudge to pull tweens and parents back into the same orbit, built as a tight system—brand film plus short moments, daily reveals and store play—made with collaborators first and a bias for usefulness over fireworks; Sources: larsmarsjorgensen.com";
+      if(/unu|hotel|sri lanka|hospitality/.test(t)) msg="UNU is a surf-design boutique project that keeps things imperfect on purpose—spiral stair, teal-green quiet, local produce doing the talking—so the brand reads as hospitable rather than loud, and the experience hums along without begging for attention; Sources: larsmarsjorgensen.com";
+      if(/collab|credit|agenc/.test(t)) msg="Work works because people do: credits go to collaborators and production partners up front, with agencies and makers named where it moves the story forward; ask for a specific project and I’ll list names first, ego second; Sources: LinkedIn";
+      pushMessage('assistant', msg);
+    }
+
+    async function functionAnswer(q){
+      try{
+        setBanner("Thinking with ingestion + images…");
+        const ingest = await fetch('/.netlify/functions/ingest', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ urls: seed.sources.map(x=>x.url) })});
+        const ingested = ingest.ok ? await ingest.json() : { notes: [] };
+        const resp = await fetch('/.netlify/functions/ask', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages: buildMessages(q), ingested })});
+        const data = await resp.json();
+        const text = data.text || "(no content)";
+        const images = data.images || [];
+        const refs = data.refs || seed.sources;
+        pushMessage('assistant', text, images, refs);
+        setBanner("");
+      }catch(e){
+        setBanner("Function call failed. Falling back to local.");
+        localAnswer(q);
+      }
+    }
+
+    async function openaiAnswer(q){
+      if(!localStorage.getItem('openai_key')){ setBanner("No OpenAI key. Open Settings."); return pushMessage('assistant',"No key set."); }
+      try{
+        setBanner("Calling OpenAI directly…");
+        const images = await fetch('/.netlify/functions/images', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ q })}).then(r=>r.json()).catch(()=>({urls:[]}));
+        const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('openai_key')},
+          body: JSON.stringify({ model: localStorage.getItem('openai_model')||'gpt-4o-mini', temperature:0.5, messages: buildMessages(q) })
+        });
+        const data = await resp.json();
+        const text = data.choices?.[0]?.message?.content || "(no content)";
+        pushMessage('assistant', text, images.urls||[], seed.sources);
+        setBanner("");
+      }catch(e){
+        setBanner("OpenAI call failed; try Function engine.");
+        localAnswer(q);
+      }
+    }
+  </script>
+</body>
+</html>
