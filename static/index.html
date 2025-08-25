@@ -72,7 +72,7 @@
           <div id="chat" class="chat"></div>
 
           <div class="bar">
-            <textarea id="input" placeholder="Try: a one-paragraph overview; two must‑see pieces for a toy brand CMO; collaborators worth knowing; ‘show me something random’."></textarea>
+            <textarea id="input" placeholder="Try: a one-paragraph overview; two must-see pieces for a toy brand CMO; collaborators worth knowing; ‘show me something random’."></textarea>
           </div>
           <div class="bar">
             <div style="display:flex;gap:8px"><button id="send" class="primary">Send →</button><button id="reset" class="outline">Reset</button><button id="settings" class="outline">Settings</button></div>
@@ -102,14 +102,14 @@
     <h3 style="margin:0 0 8px">Settings</h3>
     <p class="muted" style="margin:0 0 12px">Paste an OpenAI key (stored only in your browser). Optionally enable image search via Bing or Giphy keys (server-side recommended).</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div><div class="sub">OpenAI Key</div><input id="apiKey" placeholder="sk-..." style="width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f0f12;color:var(--ink)"></div>
+      <div><div class="sub">OpenAI Key</div><input id="apiKey" placeholder="sk-..." style="width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f0f12;color:#0f0f12;color:var(--ink)"></div>
       <div><div class="sub">Model</div><input id="model" value="gpt-4o-mini" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f0f12;color:var(--ink)"></div>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px"><button id="saveSettings" class="primary">Save</button><button id="closeSettings" class="outline">Close</button></div>
   </dialog>
 
   <script>
-    const seed = {"name": "Lars Jorgensen", "title": "Creative Director / ECD", "location": "Lisbon, Portugal", "emails": ["larsandnikki@twoandahalfvikings.com"], "sources": [{"name": "Portfolio", "url": "https://larsmarsjorgensen.com"}, {"name": "KISS Studio", "url": "https://keeptitstupidsimple.studio"}, {"name": "Behance", "url": "https://www.behance.net/larsmarsjorgensen"}, {"name": "LinkedIn", "url": "https://www.linkedin.com/in/larsmarsjorgensen"}], "voice": "Vonnegut\u00d7Adams: irreverent, humane, dry wit; concise single-paragraph answers."};
+    const seed = {"name": "Lars Jorgensen", "title": "Creative Director / ECD", "location": "Lisbon, Portugal", "emails": ["larsandnikki@twoandahalfvikings.com"], "sources": [{"name": "Portfolio", "url": "https://larsmarsjorgensen.com"}, {"name": "KISS Studio", "url": "https://keeptitstupidsimple.studio"}, {"name": "Behance", "url": "https://www.behance.net/larsmarsjorgensen"}, {"name": "LinkedIn", "url": "https://www.linkedin.com/in/larsmarsjorgensen"}], "voice": "Vonnegut×Adams: irreverent, humane, dry wit; concise single-paragraph answers."};
     const sugg = [
       "Give me a one-paragraph overview in your voice.",
       "Two must-see pieces for a toy brand CMO — briefly, with sources.",
@@ -179,67 +179,4 @@
         : mode==='factual'
           ? "FACTUAL MODE: Ground everything in seed/ingested sources; if unknown, label [unverified]."
           : "PLAYFUL MODE: Dry wit allowed; keep it useful and concise; label uncertainties.";
-      const system = `You are a portfolio concierge. Voice = Vonnegut×Adams: irreverent, humane, concise. Always respond as ONE paragraph (no line breaks), max ~110 words. Credit collaborators first when relevant. Include a short 'Sources:' list only if you relied on seed/ingested links, rendered as names/URLs in plain text. If user asks for random/irreverent, you may add a short [absurd] aside that’s obviously fictional. Avoid lists, avoid headings; one tight paragraph.`;
-      return [
-        {role:'system', content: system + "\n" + modeLine},
-        {role:'user', content: "SEED (truth anchors):\n"+JSON.stringify(seed)},
-        {role:'user', content: "QUESTION: "+q}
-      ];
-    }
-
-    async function route(q){
-      if(engine==='local') return localAnswer(q);
-      if(engine==='openai') return openaiAnswer(q);
-      return functionAnswer(q);
-    }
-
-    function localAnswer(q){
-      const t=q.toLowerCase();
-      let msg="I’m the demo brain: ask for an overview, LEGO Holiday in one paragraph, UNU in one paragraph, or collaborators credit-first; I’ll also throw in a source if it helps.";
-      if(/overview|general|about/.test(t)) msg="Lars is a Lisbon-based creative director who marries narrative clarity with playful mischief, builds modular teams via KISS, and is best known for LEGO Holiday storytelling and a surf-leaning Sri Lankan hospitality project; if you want the short list, ask me for two must‑see pieces and I’ll point you briskly with sources.";
-      if(/lego|holiday|worlds|brand film/.test(t)) msg="The LEGO Holiday work is a music-led nudge to pull tweens and parents back into the same orbit, built as a tight system—brand film plus short moments, daily reveals and store play—made with collaborators first and a bias for usefulness over fireworks; Sources: larsmarsjorgensen.com";
-      if(/unu|hotel|sri lanka|hospitality/.test(t)) msg="UNU is a surf-design boutique project that keeps things imperfect on purpose—spiral stair, teal-green quiet, local produce doing the talking—so the brand reads as hospitable rather than loud, and the experience hums along without begging for attention; Sources: larsmarsjorgensen.com";
-      if(/collab|credit|agenc/.test(t)) msg="Work works because people do: credits go to collaborators and production partners up front, with agencies and makers named where it moves the story forward; ask for a specific project and I’ll list names first, ego second; Sources: LinkedIn";
-      pushMessage('assistant', msg);
-    }
-
-    async function functionAnswer(q){
-      try{
-        setBanner("Thinking with ingestion + images…");
-        const ingest = await fetch('/.netlify/functions/ingest', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ urls: seed.sources.map(x=>x.url) })});
-        const ingested = ingest.ok ? await ingest.json() : { notes: [] };
-        const resp = await fetch('/.netlify/functions/ask', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages: buildMessages(q), ingested })});
-        const data = await resp.json();
-        const text = data.text || "(no content)";
-        const images = data.images || [];
-        const refs = data.refs || seed.sources;
-        pushMessage('assistant', text, images, refs);
-        setBanner("");
-      }catch(e){
-        setBanner("Function call failed. Falling back to local.");
-        localAnswer(q);
-      }
-    }
-
-    async function openaiAnswer(q){
-      if(!localStorage.getItem('openai_key')){ setBanner("No OpenAI key. Open Settings."); return pushMessage('assistant',"No key set."); }
-      try{
-        setBanner("Calling OpenAI directly…");
-        const images = await fetch('/.netlify/functions/images', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ q })}).then(r=>r.json()).catch(()=>({urls:[]}));
-        const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-          method:'POST',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('openai_key')},
-          body: JSON.stringify({ model: localStorage.getItem('openai_model')||'gpt-4o-mini', temperature:0.5, messages: buildMessages(q) })
-        });
-        const data = await resp.json();
-        const text = data.choices?.[0]?.message?.content || "(no content)";
-        pushMessage('assistant', text, images.urls||[], seed.sources);
-        setBanner("");
-      }catch(e){
-        setBanner("OpenAI call failed; try Function engine.");
-        localAnswer(q);
-      }
-    }
-  </script>
-</body>
-</html>
+      const system = `You are a portfolio concierge. Voice = Vonnegut×Adams: irreverent, humane, concise. Always respond as ONE paragraph (no line breaks), max ~110 words. Credit collaborators first when relevant. Include a short 'Sources:' list only if you relied on seed/ingested links, rendered as names/URLs in plain text. If user asks for random/irreverent, you may add a s
